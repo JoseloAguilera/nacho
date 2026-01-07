@@ -1,0 +1,141 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Models\ProductModel;
+use App\Models\CategoryModel;
+
+class Products extends BaseController
+{
+    protected $productModel;
+    protected $categoryModel;
+    protected $session;
+
+    public function __construct()
+    {
+        $this->productModel = new ProductModel();
+        $this->categoryModel = new CategoryModel();
+        $this->session = session();
+        helper(['form', 'url']);
+    }
+
+    public function index()
+    {
+        $data = [
+            'title' => 'Productos',
+            'products' => $this->productModel->getProductsWithCategory()
+        ];
+
+        return view('products/index', $data);
+    }
+
+    public function create()
+    {
+        $data = [
+            'title' => 'Nuevo Producto',
+            'categories' => $this->categoryModel->findAll()
+        ];
+
+        return view('products/create', $data);
+    }
+
+    public function store()
+    {
+        $validation = \Config\Services::validation();
+        
+        $validation->setRules([
+            'category_id' => 'required|is_natural_no_zero',
+            'code' => 'required|max_length[50]|is_unique[products.code]',
+            'name' => 'required|min_length[3]|max_length[200]',
+            'cost_price' => 'required|decimal',
+            'price' => 'required|decimal',
+            'min_sale_price' => 'required|decimal',
+            'stock' => 'required|integer',
+            'description' => 'permit_empty|max_length[500]'
+        ]);
+
+        if (!$validation->withRequest($this->request)->run()) {
+            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+        }
+
+        $data = [
+            'category_id' => $this->request->getPost('category_id'),
+            'code' => $this->request->getPost('code'),
+            'name' => $this->request->getPost('name'),
+            'description' => $this->request->getPost('description'),
+            'cost_price' => $this->request->getPost('cost_price'),
+            'price' => $this->request->getPost('price'),
+            'min_sale_price' => $this->request->getPost('min_sale_price'),
+            'stock' => $this->request->getPost('stock')
+        ];
+
+        if ($this->productModel->insert($data)) {
+            return redirect()->to('/products')->with('success', 'Producto creado correctamente');
+        } else {
+            return redirect()->back()->withInput()->with('errors', $this->productModel->errors());
+        }
+    }
+
+    public function edit($id)
+    {
+        $product = $this->productModel->find($id);
+        
+        if (!$product) {
+            return redirect()->to('/products')->with('error', 'Producto no encontrado');
+        }
+
+        $data = [
+            'title' => 'Editar Producto',
+            'product' => $product,
+            'categories' => $this->categoryModel->findAll()
+        ];
+
+        return view('products/edit', $data);
+    }
+
+    public function update($id)
+    {
+        $validation = \Config\Services::validation();
+        
+        $validation->setRules([
+            'category_id' => 'required|is_natural_no_zero',
+            'code' => "required|max_length[50]|is_unique[products.code,id,{$id}]",
+            'name' => 'required|min_length[3]|max_length[200]',
+            'cost_price' => 'required|decimal',
+            'price' => 'required|decimal',
+            'min_sale_price' => 'required|decimal',
+            'stock' => 'required|integer',
+            'description' => 'permit_empty|max_length[500]'
+        ]);
+
+        if (!$validation->withRequest($this->request)->run()) {
+            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+        }
+
+        $data = [
+            'category_id' => $this->request->getPost('category_id'),
+            'code' => $this->request->getPost('code'),
+            'name' => $this->request->getPost('name'),
+            'description' => $this->request->getPost('description'),
+            'cost_price' => $this->request->getPost('cost_price'),
+            'price' => $this->request->getPost('price'),
+            'min_sale_price' => $this->request->getPost('min_sale_price'),
+            'stock' => $this->request->getPost('stock')
+        ];
+
+        if ($this->productModel->skipValidation(true)->update($id, $data)) {
+            return redirect()->to('/products')->with('success', 'Producto actualizado correctamente');
+        } else {
+            return redirect()->back()->withInput()->with('errors', $this->productModel->errors());
+        }
+    }
+
+    public function delete($id)
+    {
+        if ($this->productModel->delete($id)) {
+            return redirect()->to('/products')->with('success', 'Producto eliminado correctamente');
+        } else {
+            return redirect()->to('/products')->with('error', 'No se pudo eliminar el producto');
+        }
+    }
+}
