@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\CategoryModel;
+use App\Models\ProductModel;
 
 class Categories extends BaseController
 {
@@ -100,6 +101,14 @@ class Categories extends BaseController
 
     public function delete($id)
     {
+        $productModel = new ProductModel();
+        
+        $productCount = $productModel->where('category_id', $id)->countAllResults();
+
+        if ($productCount > 0) {
+            return redirect()->to('/categories')->with('error', 'No se puede eliminar la categoría porque tiene ' . $productCount . ' productos asociados.');
+        }
+
         if ($this->categoryModel->delete($id)) {
             return redirect()->to('/categories')->with('success', 'Categoría eliminada correctamente');
         } else {
