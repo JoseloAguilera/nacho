@@ -16,6 +16,7 @@
 
 
 -- Volcando estructura de base de datos para nacho
+DROP DATABASE IF EXISTS `nacho`;
 CREATE DATABASE IF NOT EXISTS `nacho` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `nacho`;
 
@@ -26,16 +27,17 @@ CREATE TABLE IF NOT EXISTS `categories` (
   `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Volcando datos para la tabla nacho.categories: ~4 rows (aproximadamente)
-INSERT INTO `categories` (`id`, `name`, `description`, `created_at`) VALUES
-	(1, 'Electrónica', 'Productos electrónicos y tecnología', '2025-12-28 20:21:42'),
-	(2, 'Alimentos', 'Productos alimenticios', '2025-12-28 20:21:42'),
-	(3, 'Bebidas', 'Bebidas en general', '2025-12-28 20:21:42'),
-	(4, 'Limpieza', 'Productos de limpieza', '2025-12-28 20:21:42');
+INSERT INTO `categories` (`id`, `name`, `description`, `created_at`, `updated_at`) VALUES
+	(1, 'Electrónica', 'Productos electrónicos y tecnología', '2025-12-28 20:21:42', NULL),
+	(2, 'Alimentos', 'Productos alimenticios', '2025-12-28 20:21:42', NULL),
+	(3, 'Bebidas', 'Bebidas en general', '2025-12-28 20:21:42', NULL),
+	(4, 'Limpieza', 'Productos de limpieza', '2025-12-28 20:21:42', NULL);
 
 -- Volcando estructura para tabla nacho.customers
 DROP TABLE IF EXISTS `customers`;
@@ -147,6 +149,25 @@ CREATE TABLE IF NOT EXISTS `inventory_adjustments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Volcando datos para la tabla nacho.inventory_adjustments: ~0 rows (aproximadamente)
+
+-- Volcando estructura para tabla nacho.migrations
+DROP TABLE IF EXISTS `migrations`;
+CREATE TABLE IF NOT EXISTS `migrations` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `version` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `class` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `group` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `namespace` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `time` int NOT NULL,
+  `batch` int unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Volcando datos para la tabla nacho.migrations: 1 rows
+/*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
+INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`, `batch`) VALUES
+	(1, '20260118221900', 'App\\Database\\Migrations\\AddUpdatedAtToCategories', 'default', 'App', 1768774795, 1);
+/*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 
 -- Volcando estructura para tabla nacho.products
 DROP TABLE IF EXISTS `products`;
